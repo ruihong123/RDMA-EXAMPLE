@@ -1,0 +1,4 @@
+C:/Users/wangr/Documents/RDMA-EXAMPLE/02/out/build/x64-Debug (default)/CMakeFiles/myprog.dir
+C:/Users/wangr/Documents/RDMA-EXAMPLE/02/out/build/x64-Debug (default)/CMakeFiles/rdma.dir
+C:/Users/wangr/Documents/RDMA-EXAMPLE/02/out/build/x64-Debug (default)/CMakeFiles/edit_cache.dir
+C:/Users/wangr/Documents/RDMA-EXAMPLE/02/out/build/x64-Debug (default)/CMakeFiles/rebuild_cache.dir

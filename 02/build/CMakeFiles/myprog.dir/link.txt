@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/myprog.dir/main.cpp.o  -o myprog -Wl,-rpath,/mnt/c/Users/wangr/Documents/RDMA-EXAMPLE/02/build librdma.so -libverbs 

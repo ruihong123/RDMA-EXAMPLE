@@ -1,0 +1,44 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+..//rdma.h
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+unistd.h
+-
+stdint.h
+-
+inttypes.h
+-
+endian.h
+-
+byteswap.h
+-
+getopt.h
+-
+sys/time.h
+-
+arpa/inet.h
+-
+infiniband/verbs.h
+-
+sys/types.h
+-
+sys/socket.h
+-
+netdb.h
+-
+
+/mnt/c/Users/wangr/Documents/RDMA-EXAMPLE/02/rdma.c
+rdma.h
+-
+

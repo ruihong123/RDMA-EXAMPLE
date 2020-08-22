@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC   -shared -Wl,-soname,librdma.so -o librdma.so CMakeFiles/rdma.dir/rdma.c.o 
