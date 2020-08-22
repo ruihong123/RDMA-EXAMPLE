@@ -163,32 +163,32 @@ main.cpp.s:
 	$(MAKE) -f CMakeFiles/myprog.dir/build.make CMakeFiles/myprog.dir/main.cpp.s
 .PHONY : main.cpp.s
 
-rdma.o: rdma.c.o
+rdma.o: rdma.cpp.o
 
 .PHONY : rdma.o
 
 # target to build an object file
-rdma.c.o:
-	$(MAKE) -f CMakeFiles/rdma.dir/build.make CMakeFiles/rdma.dir/rdma.c.o
-.PHONY : rdma.c.o
+rdma.cpp.o:
+	$(MAKE) -f CMakeFiles/rdma.dir/build.make CMakeFiles/rdma.dir/rdma.cpp.o
+.PHONY : rdma.cpp.o
 
-rdma.i: rdma.c.i
+rdma.i: rdma.cpp.i
 
 .PHONY : rdma.i
 
 # target to preprocess a source file
-rdma.c.i:
-	$(MAKE) -f CMakeFiles/rdma.dir/build.make CMakeFiles/rdma.dir/rdma.c.i
-.PHONY : rdma.c.i
+rdma.cpp.i:
+	$(MAKE) -f CMakeFiles/rdma.dir/build.make CMakeFiles/rdma.dir/rdma.cpp.i
+.PHONY : rdma.cpp.i
 
-rdma.s: rdma.c.s
+rdma.s: rdma.cpp.s
 
 .PHONY : rdma.s
 
 # target to generate assembly for a file
-rdma.c.s:
-	$(MAKE) -f CMakeFiles/rdma.dir/build.make CMakeFiles/rdma.dir/rdma.c.s
-.PHONY : rdma.c.s
+rdma.cpp.s:
+	$(MAKE) -f CMakeFiles/rdma.dir/build.make CMakeFiles/rdma.dir/rdma.cpp.s
+.PHONY : rdma.cpp.s
 
 # Help Target
 help:

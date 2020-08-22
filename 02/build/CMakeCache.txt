@@ -187,8 +187,8 @@ myprogs_BINARY_DIR:STATIC=/mnt/c/Users/wangr/Documents/RDMA-EXAMPLE/02/build
 //Value Computed by CMake
 myprogs_SOURCE_DIR:STATIC=/mnt/c/Users/wangr/Documents/RDMA-EXAMPLE/02
 
-//Dependencies for target
-rdma_LIB_DEPENDS:STATIC=
+//Dependencies for the target
+rdma_LIB_DEPENDS:STATIC=general;ibverbs;
 
 
 ########################
