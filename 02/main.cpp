@@ -1,6 +1,4 @@
-extern "C" {
-	#include <rdma.h>
-}
+#include <rdma.h>
 
 int main (int argc, char *argv[]) { 
 	struct resources res;

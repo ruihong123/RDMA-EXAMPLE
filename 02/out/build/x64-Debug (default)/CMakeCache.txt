@@ -196,6 +196,9 @@ myprogs_BINARY_DIR:STATIC=C:/Users/wangr/Documents/RDMA-EXAMPLE/02/out/build/x64
 //Value Computed by CMake
 myprogs_SOURCE_DIR:STATIC=C:/Users/wangr/Documents/RDMA-EXAMPLE/02
 
+//Dependencies for the target
+rdma_LIB_DEPENDS:STATIC=general;ibverbs;
+
 
 ########################
 # INTERNAL cache entries

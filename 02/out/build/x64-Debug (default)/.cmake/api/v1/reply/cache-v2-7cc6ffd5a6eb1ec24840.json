@@ -1048,6 +1048,18 @@
 			],
 			"type" : "STATIC",
 			"value" : "C:/Users/wangr/Documents/RDMA-EXAMPLE/02"
+		},
+		{
+			"name" : "rdma_LIB_DEPENDS",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Dependencies for the target"
+				}
+			],
+			"type" : "STATIC",
+			"value" : "general;ibverbs;"
 		}
 	],
 	"kind" : "cache",
