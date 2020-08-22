@@ -1,10 +1,7 @@
 #ifndef RDMA_H
 #define RDMA_H
 
-#ifdef __cplusplus
-extern "C" { //only need to export C interface if
-// used by C++ source code
-#endif
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,6 +19,11 @@ extern "C" { //only need to export C interface if
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#ifdef __cplusplus
+extern "C" { //only need to export C interface if
+// used by C++ source code
+#endif
+
 /* poll CQ timeout in millisec (2 seconds) */
 #define MAX_POLL_CQ_TIMEOUT 2000
 #define MSG "SEND operation "
