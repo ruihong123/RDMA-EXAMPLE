@@ -45,7 +45,7 @@ build cmake_object_order_depends_target_myprog_Debug: phony || cmake_object_orde
 
 build CMakeFiles\myprog.dir\main.cpp.obj: CXX_COMPILER__myprog_Debug ..\..\..\main.cpp || cmake_object_order_depends_target_myprog_Debug
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
-  INCLUDES = -I\mnt\c\Users\wangr\Documents\RDMA-EXAMPLE\02
+  INCLUDES = -I..\..\..\$(PROJECT_SOURCE_DIR)
   OBJECT_DIR = CMakeFiles\myprog.dir
   OBJECT_FILE_DIR = CMakeFiles\myprog.dir
   TARGET_COMPILE_PDB = CMakeFiles\myprog.dir\
@@ -83,7 +83,7 @@ build cmake_object_order_depends_target_rdma_Debug: phony || CMakeFiles\rdma.dir
 build CMakeFiles\rdma.dir\rdma.cpp.obj: CXX_COMPILER__rdma_Debug ..\..\..\rdma.cpp || cmake_object_order_depends_target_rdma_Debug
   DEFINES = -Drdma_EXPORTS
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
-  INCLUDES = -I\mnt\c\Users\wangr\Documents\RDMA-EXAMPLE\02
+  INCLUDES = -I..\..\..\$(PROJECT_SOURCE_DIR)
   OBJECT_DIR = CMakeFiles\rdma.dir
   OBJECT_FILE_DIR = CMakeFiles\rdma.dir
   TARGET_COMPILE_PDB = CMakeFiles\rdma.dir\
