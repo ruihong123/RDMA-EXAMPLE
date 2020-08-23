@@ -183,6 +183,7 @@ int resources_create(struct resources* res)
 	int cq_size = 0;
 	int num_devices;
 	int rc = 0;
+	extern int msg_size;
 	/* if client side */
 	if (config.server_name)
 	{
@@ -283,8 +284,8 @@ int resources_create(struct resources* res)
 		goto resources_create_exit;
 	}
 	/* allocate the memory buffer that will hold the data */
-	size = MSG_SIZE;
-	res->buf = new char[MSG_SIZE];
+	size = msg_size;
+	res->buf = new char[msg_size];
 	if (!res->buf)
 	{
 		fprintf(stderr, "failed to malloc %Zu bytes to memory buffer\n", size);
@@ -507,10 +508,11 @@ int post_send(struct resources* res, int opcode)
 	struct ibv_sge sge;
 	struct ibv_send_wr* bad_wr = NULL;
 	int rc;
+	extern int msg_size;
 	/* prepare the scatter/gather entry */
 	memset(&sge, 0, sizeof(sge));
 	sge.addr = (uintptr_t)res->buf;
-	sge.length = MSG_SIZE;
+	sge.length = msg_size;
 	sge.lkey = res->mr->lkey;
 	/* prepare the send work request */
 	memset(&sr, 0, sizeof(sr));
@@ -571,10 +573,11 @@ int post_receive(struct resources* res)
 	struct ibv_sge sge;
 	struct ibv_recv_wr* bad_wr;
 	int rc;
+	extern int msg_size;
 	/* prepare the scatter/gather entry */
 	memset(&sge, 0, sizeof(sge));
 	sge.addr = (uintptr_t)res->buf;
-	sge.length = MSG_SIZE;
+	sge.length = msg_size;
 	sge.lkey = res->mr->lkey;
 	/* prepare the receive work request */
 	memset(&rr, 0, sizeof(rr));

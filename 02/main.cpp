@@ -1,48 +1,42 @@
 #include <rdma.h>
-
+int msg_size;
 int main (int argc, char *argv[]) { 
 	struct resources res;
 	int rc = 1;
 	char temp_char;
 	std::chrono::steady_clock::time_point start;
 	std::chrono::steady_clock::time_point end;
+	
 	/* parse the command line parameters */
 	while (1)
 	{
 		int c;
-		option long_options[] = {
-			{name : "port", has_arg : 1, flag : NULL, val : 'p'},
-			{name : "ib-dev", has_arg : 1, flag : NULL, val : 'd'},
-			{name : "ib-port", has_arg : 1, flag : NULL, val : 'i'},
-			{name : "gid-idx", has_arg : 1, flag : NULL, val : 'g'},
-			{name : NULL, has_arg : 0, flag : NULL, val : '\0'}
+		//Options  opts(*argv, optv);
+		//OptArgvIter  iter(--argc, ++argv);
+		//const char* optarg, * str = NULL;
+		//int  errors = 0, msg_size = 0;
+		//const char* optv[] = {
+		//   "s:size <number>",
+		//   NULL
+		//		};
+		//while (char optchar = opts(iter, optarg)) {
+		//	switch (optchar) {
+		//	case 's':
+		//		msg_size = optarg; break;
+		//	default:  ++errors; break;
+		//	} //switch
+		//}
+		struct option long_options[] = {
+			{name: "msg_size", has_arg : 1, flag : nullptr, val : 's'},
+			{name: nullptr, has_arg : 0, flag : nullptr, val : '\0'}
 		};
-		c = getopt_long(argc, argv, "p:d:i:g:", long_options, NULL);
+		c = getopt_long(argc, argv, "s:", long_options, nullptr);
 		if (c == -1)
 			break;
 		switch (c)
 		{
-		case 'p':
-			config.tcp_port = strtoul(optarg, NULL, 0);
-			break;
-		case 'd':
-			config.dev_name = strdup(optarg);
-			break;
-		case 'i':
-			config.ib_port = strtoul(optarg, NULL, 0);
-			if (config.ib_port < 0)
-			{
-				usage(argv[0]);
-				return 1;
-			}
-			break;
-		case 'g':
-			config.gid_idx = strtoul(optarg, NULL, 0);
-			if (config.gid_idx < 0)
-			{
-				usage(argv[0]);
-				return 1;
-			}
+		case 's':
+			msg_size = std::stoi(optarg); 
 			break;
 		default:
 			usage(argv[0]);
