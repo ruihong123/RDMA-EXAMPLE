@@ -136,173 +136,6 @@ int sock_sync_data(int sock, int xfer_size, char* local_data, char* remote_data)
 	return rc;
 }
 /******************************************************************************
-End of socket operations
-******************************************************************************/
-/* poll_completion */
-/******************************************************************************
-* Function: poll_completion
-*
-* Input
-* res pointer to resources structure
-*
-* Output
-* none
-*
-* Returns
-* 0 on success, 1 on failure
-*
-* Description
-* Poll the completion queue for a single event. This function will continue to
-* poll the queue until MAX_POLL_CQ_TIMEOUT milliseconds have passed.
-*
-******************************************************************************/
-int poll_completion(struct resources* res)
-{
-	struct ibv_wc wc;
-	unsigned long start_time_msec;
-	unsigned long cur_time_msec;
-	struct timeval cur_time;
-	int poll_result;
-	int rc = 0;
-	/* poll the completion for a while before giving up of doing it .. */
-	gettimeofday(&cur_time, NULL);
-	start_time_msec = (cur_time.tv_sec * 1000) + (cur_time.tv_usec / 1000);
-	do
-	{
-		poll_result = ibv_poll_cq(res->cq, 1, &wc);
-		gettimeofday(&cur_time, NULL);
-		cur_time_msec = (cur_time.tv_sec * 1000) + (cur_time.tv_usec / 1000);
-	} while ((poll_result == 0) && ((cur_time_msec - start_time_msec) < MAX_POLL_CQ_TIMEOUT));
-	if (poll_result < 0)
-	{
-		/* poll CQ failed */
-		fprintf(stderr, "poll CQ failed\n");
-		rc = 1;
-	}
-	else if (poll_result == 0)
-	{ /* the CQ is empty */
-		fprintf(stderr, "completion wasn't found in the CQ after timeout\n");
-		rc = 1;
-	}
-	else
-	{
-		/* CQE found */
-		fprintf(stdout, "completion was found in CQ with status 0x%x\n", wc.status);
-		/* check the completion status (here we don't care about the completion opcode */
-		if (wc.status != IBV_WC_SUCCESS)
-		{
-			fprintf(stderr, "got bad completion with status: 0x%x, vendor syndrome: 0x%x\n", wc.status,
-				wc.vendor_err);
-			rc = 1;
-		}
-	}
-	return rc;
-}
-/******************************************************************************
-* Function: post_send
-*
-* Input
-* res pointer to resources structure
-* opcode IBV_WR_SEND, IBV_WR_RDMA_READ or IBV_WR_RDMA_WRITE
-*
-* Output
-* none
-*
-* Returns
-* 0 on success, error code on failure
-*
-* Description
-* This function will create and post a send work request
-******************************************************************************/
-int post_send(struct resources* res, int opcode)
-{
-	struct ibv_send_wr sr;
-	struct ibv_sge sge;
-	struct ibv_send_wr* bad_wr = NULL;
-	int rc;
-	/* prepare the scatter/gather entry */
-	memset(&sge, 0, sizeof(sge));
-	sge.addr = (uintptr_t)res->buf;
-	sge.length = MSG_SIZE;
-	sge.lkey = res->mr->lkey;
-	/* prepare the send work request */
-	memset(&sr, 0, sizeof(sr));
-	sr.next = NULL;
-	sr.wr_id = 0;
-	sr.sg_list = &sge;
-	sr.num_sge = 1;
-	sr.opcode = static_cast<ibv_wr_opcode>(opcode);
-	sr.send_flags = IBV_SEND_SIGNALED;
-	if (opcode != IBV_WR_SEND)
-	{
-		sr.wr.rdma.remote_addr = res->remote_props.addr;
-		sr.wr.rdma.rkey = res->remote_props.rkey;
-	}
-	/* there is a Receive Request in the responder side, so we won't get any into RNR flow */
-	rc = ibv_post_send(res->qp, &sr, &bad_wr);
-	if (rc)
-		fprintf(stderr, "failed to post SR\n");
-	else
-	{
-		switch (opcode)
-		{
-		case IBV_WR_SEND:
-			fprintf(stdout, "Send Request was posted\n");
-			break;
-		case IBV_WR_RDMA_READ:
-			fprintf(stdout, "RDMA Read Request was posted\n");
-			break;
-		case IBV_WR_RDMA_WRITE:
-			fprintf(stdout, "RDMA Write Request was posted\n");
-			break;
-		default:
-			fprintf(stdout, "Unknown Request was posted\n");
-			break;
-		}
-	}
-	return rc;
-}
-/******************************************************************************
-* Function: post_receive
-*
-* Input
-* res pointer to resources structure
-*
-* Output
-* none
-*
-* Returns
-* 0 on success, error code on failure
-*
-* Description
-*
-******************************************************************************/
-int post_receive(struct resources* res)
-{
-	struct ibv_recv_wr rr;
-	struct ibv_sge sge;
-	struct ibv_recv_wr* bad_wr;
-	int rc;
-	/* prepare the scatter/gather entry */
-	memset(&sge, 0, sizeof(sge));
-	sge.addr = (uintptr_t)res->buf;
-	sge.length = MSG_SIZE;
-	sge.lkey = res->mr->lkey;
-	/* prepare the receive work request */
-	memset(&rr, 0, sizeof(rr));
-	rr.next = NULL;
-	rr.wr_id = 0;
-	rr.sg_list = &sge;
-	rr.num_sge = 1;
-	/* post the Receive Request to the RQ */
-	rc = ibv_post_recv(res->qp, &rr, &bad_wr);
-	if (rc)
-		fprintf(stderr, "failed to post RR\n");
-	else
-		fprintf(stdout, "Receive Request was posted\n");
-	return rc;
-}
-/******************************************************************************
 * Function: resources_init
 *
 * Input
@@ -451,7 +284,7 @@ int resources_create(struct resources* res)
 	}
 	/* allocate the memory buffer that will hold the data */
 	size = MSG_SIZE;
-	res->buf = (char*)malloc(size);
+	res->buf = new char[MSG_SIZE];
 	if (!res->buf)
 	{
 		fprintf(stderr, "failed to malloc %Zu bytes to memory buffer\n", size);
@@ -540,6 +373,280 @@ resources_create_exit:
 			if (close(res->sock))
 				fprintf(stderr, "failed to close socket\n");
 			res->sock = -1;
+		}
+	}
+	return rc;
+}
+/******************************************************************************
+* Function: connect_qp
+*
+* Input
+* res pointer to resources structure
+*
+* Output
+* none
+*
+* Returns
+* 0 on success, error code on failure
+*
+* Description
+* Connect the QP. Transition the server side to RTR, sender side to RTS
+******************************************************************************/
+int connect_qp(struct resources* res)
+{
+	struct cm_con_data_t local_con_data;
+	struct cm_con_data_t remote_con_data;
+	struct cm_con_data_t tmp_con_data;
+	int rc = 0;
+	char temp_char;
+	union ibv_gid my_gid;
+	if (config.gid_idx >= 0)
+	{
+		rc = ibv_query_gid(res->ib_ctx, config.ib_port, config.gid_idx, &my_gid);
+		if (rc)
+		{
+			fprintf(stderr, "could not get gid for port %d, index %d\n", config.ib_port, config.gid_idx);
+			return rc;
+		}
+	}
+	else
+		memset(&my_gid, 0, sizeof my_gid);
+	/* exchange using TCP sockets info required to connect QPs */
+	local_con_data.addr = htonll((uintptr_t)res->buf);
+	local_con_data.rkey = htonl(res->mr->rkey);
+	local_con_data.qp_num = htonl(res->qp->qp_num);
+	local_con_data.lid = htons(res->port_attr.lid);
+	memcpy(local_con_data.gid, &my_gid, 16);
+	fprintf(stdout, "\nLocal LID = 0x%x\n", res->port_attr.lid);
+	if (sock_sync_data(res->sock, sizeof(struct cm_con_data_t), (char*)&local_con_data, (char*)&tmp_con_data) < 0)
+	{
+		fprintf(stderr, "failed to exchange connection data between sides\n");
+		rc = 1;
+		goto connect_qp_exit;
+	}
+	remote_con_data.addr = ntohll(tmp_con_data.addr);
+	remote_con_data.rkey = ntohl(tmp_con_data.rkey);
+	remote_con_data.qp_num = ntohl(tmp_con_data.qp_num);
+	remote_con_data.lid = ntohs(tmp_con_data.lid);
+	memcpy(remote_con_data.gid, tmp_con_data.gid, 16);
+	/* save the remote side attributes, we will need it for the post SR */
+	res->remote_props = remote_con_data;
+	fprintf(stdout, "Remote address = 0x%" PRIx64 "\n", remote_con_data.addr);
+	fprintf(stdout, "Remote rkey = 0x%x\n", remote_con_data.rkey);
+	fprintf(stdout, "Remote QP number = 0x%x\n", remote_con_data.qp_num);
+	fprintf(stdout, "Remote LID = 0x%x\n", remote_con_data.lid);
+	if (config.gid_idx >= 0)
+	{
+		uint8_t* p = remote_con_data.gid;
+		fprintf(stdout, "Remote GID =%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n ", p[0],
+			p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+	}
+	/* modify the QP to init */
+	rc = modify_qp_to_init(res->qp);
+	if (rc)
+	{
+		fprintf(stderr, "change QP state to INIT failed\n");
+		goto connect_qp_exit;
+	}
+	/* let the client post RR to be prepared for incoming messages */
+	if (config.server_name)
+	{
+		rc = post_receive(res);
+		if (rc)
+		{
+			fprintf(stderr, "failed to post RR\n");
+			goto connect_qp_exit;
+		}
+	}
+	/* modify the QP to RTR */
+	rc = modify_qp_to_rtr(res->qp, remote_con_data.qp_num, remote_con_data.lid, remote_con_data.gid);
+	if (rc)
+	{
+		fprintf(stderr, "failed to modify QP state to RTR\n");
+		goto connect_qp_exit;
+	}
+	rc = modify_qp_to_rts(res->qp);
+	if (rc)
+	{
+		fprintf(stderr, "failed to modify QP state to RTR\n");
+		goto connect_qp_exit;
+	}
+	fprintf(stdout, "QP state was change to RTS\n");
+	/* sync to make sure that both sides are in states that they can connect to prevent packet loose */
+	if (sock_sync_data(res->sock, 1, "Q", &temp_char)) /* just send a dummy char back and forth */
+	{
+		fprintf(stderr, "sync error after QPs are were moved to RTS\n");
+		rc = 1;
+	}
+connect_qp_exit:
+	return rc;
+}
+/******************************************************************************
+End of socket operations
+******************************************************************************/
+
+/******************************************************************************
+* Function: post_send
+*
+* Input
+* res pointer to resources structure
+* opcode IBV_WR_SEND, IBV_WR_RDMA_READ or IBV_WR_RDMA_WRITE
+*
+* Output
+* none
+*
+* Returns
+* 0 on success, error code on failure
+*
+* Description
+* This function will create and post a send work request
+******************************************************************************/
+int post_send(struct resources* res, int opcode)
+{
+	struct ibv_send_wr sr;
+	struct ibv_sge sge;
+	struct ibv_send_wr* bad_wr = NULL;
+	int rc;
+	/* prepare the scatter/gather entry */
+	memset(&sge, 0, sizeof(sge));
+	sge.addr = (uintptr_t)res->buf;
+	sge.length = MSG_SIZE;
+	sge.lkey = res->mr->lkey;
+	/* prepare the send work request */
+	memset(&sr, 0, sizeof(sr));
+	sr.next = NULL;
+	sr.wr_id = 0;
+	sr.sg_list = &sge;
+	sr.num_sge = 1;
+	sr.opcode = static_cast<ibv_wr_opcode>(opcode);
+	sr.send_flags = IBV_SEND_SIGNALED;
+	if (opcode != IBV_WR_SEND)
+	{
+		sr.wr.rdma.remote_addr = res->remote_props.addr;
+		sr.wr.rdma.rkey = res->remote_props.rkey;
+	}
+	/* there is a Receive Request in the responder side, so we won't get any into RNR flow */
+	//*(start) = std::chrono::steady_clock::now();
+	rc = ibv_post_send(res->qp, &sr, &bad_wr);
+	if (rc)
+		fprintf(stderr, "failed to post SR\n");
+	else
+	{
+		switch (opcode)
+		{
+		case IBV_WR_SEND:
+			fprintf(stdout, "Send Request was posted\n");
+			break;
+		case IBV_WR_RDMA_READ:
+			fprintf(stdout, "RDMA Read Request was posted\n");
+			break;
+		case IBV_WR_RDMA_WRITE:
+			fprintf(stdout, "RDMA Write Request was posted\n");
+			break;
+		default:
+			fprintf(stdout, "Unknown Request was posted\n");
+			break;
+		}
+	}
+	return rc;
+}
+/******************************************************************************
+* Function: post_receive
+*
+* Input
+* res pointer to resources structure
+*
+* Output
+* none
+*
+* Returns
+* 0 on success, error code on failure
+*
+* Description
+*
+******************************************************************************/
+int post_receive(struct resources* res)
+{
+	struct ibv_recv_wr rr;
+	struct ibv_sge sge;
+	struct ibv_recv_wr* bad_wr;
+	int rc;
+	/* prepare the scatter/gather entry */
+	memset(&sge, 0, sizeof(sge));
+	sge.addr = (uintptr_t)res->buf;
+	sge.length = MSG_SIZE;
+	sge.lkey = res->mr->lkey;
+	/* prepare the receive work request */
+	memset(&rr, 0, sizeof(rr));
+	rr.next = NULL;
+	rr.wr_id = 0;
+	rr.sg_list = &sge;
+	rr.num_sge = 1;
+	/* post the Receive Request to the RQ */
+	rc = ibv_post_recv(res->qp, &rr, &bad_wr);
+	if (rc)
+		fprintf(stderr, "failed to post RR\n");
+	else
+		fprintf(stdout, "Receive Request was posted\n");
+	return rc;
+}
+/* poll_completion */
+/******************************************************************************
+* Function: poll_completion
+*
+* Input
+* res pointer to resources structure
+*
+* Output
+* none
+*
+* Returns
+* 0 on success, 1 on failure
+*
+* Description
+* Poll the completion queue for a single event. This function will continue to
+* poll the queue until MAX_POLL_CQ_TIMEOUT milliseconds have passed.
+*
+******************************************************************************/
+int poll_completion(struct resources* res)
+{
+	struct ibv_wc wc;
+	unsigned long start_time_msec;
+	unsigned long cur_time_msec;
+	struct timeval cur_time;
+	int poll_result;
+	int rc = 0;
+	/* poll the completion for a while before giving up of doing it .. */
+	gettimeofday(&cur_time, NULL);
+	start_time_msec = (cur_time.tv_sec * 1000) + (cur_time.tv_usec / 1000);
+	do
+	{
+		poll_result = ibv_poll_cq(res->cq, 1, &wc);
+		gettimeofday(&cur_time, NULL);
+		cur_time_msec = (cur_time.tv_sec * 1000) + (cur_time.tv_usec / 1000);
+	} while ((poll_result == 0) && ((cur_time_msec - start_time_msec) < MAX_POLL_CQ_TIMEOUT));
+	//*(end) = std::chrono::steady_clock::now();
+	if (poll_result < 0)
+	{
+		/* poll CQ failed */
+		fprintf(stderr, "poll CQ failed\n");
+		rc = 1;
+	}
+	else if (poll_result == 0)
+	{ /* the CQ is empty */
+		fprintf(stderr, "completion wasn't found in the CQ after timeout\n");
+		rc = 1;
+	}
+	else
+	{
+		/* CQE found */
+		fprintf(stdout, "completion was found in CQ with status 0x%x\n", wc.status);
+		/* check the completion status (here we don't care about the completion opcode */
+		if (wc.status != IBV_WC_SUCCESS)
+		{
+			fprintf(stderr, "got bad completion with status: 0x%x, vendor syndrome: 0x%x\n", wc.status,
+				wc.vendor_err);
+			rc = 1;
 		}
 	}
 	return rc;
@@ -661,110 +768,7 @@ int modify_qp_to_rts(struct ibv_qp* qp)
 		fprintf(stderr, "failed to modify QP state to RTS\n");
 	return rc;
 }
-/******************************************************************************
-* Function: connect_qp
-*
-* Input
-* res pointer to resources structure
-*
-* Output
-* none
-*
-* Returns
-* 0 on success, error code on failure
-*
-* Description
-* Connect the QP. Transition the server side to RTR, sender side to RTS
-******************************************************************************/
-int connect_qp(struct resources* res)
-{
-	struct cm_con_data_t local_con_data;
-	struct cm_con_data_t remote_con_data;
-	struct cm_con_data_t tmp_con_data;
-	int rc = 0;
-	char temp_char;
-	union ibv_gid my_gid;
-	if (config.gid_idx >= 0)
-	{
-		rc = ibv_query_gid(res->ib_ctx, config.ib_port, config.gid_idx, &my_gid);
-		if (rc)
-		{
-			fprintf(stderr, "could not get gid for port %d, index %d\n", config.ib_port, config.gid_idx);
-			return rc;
-		}
-	}
-	else
-		memset(&my_gid, 0, sizeof my_gid);
-	/* exchange using TCP sockets info required to connect QPs */
-	local_con_data.addr = htonll((uintptr_t)res->buf);
-	local_con_data.rkey = htonl(res->mr->rkey);
-	local_con_data.qp_num = htonl(res->qp->qp_num);
-	local_con_data.lid = htons(res->port_attr.lid);
-	memcpy(local_con_data.gid, &my_gid, 16);
-	fprintf(stdout, "\nLocal LID = 0x%x\n", res->port_attr.lid);
-	if (sock_sync_data(res->sock, sizeof(struct cm_con_data_t), (char*)&local_con_data, (char*)&tmp_con_data) < 0)
-	{
-		fprintf(stderr, "failed to exchange connection data between sides\n");
-		rc = 1;
-		goto connect_qp_exit;
-	}
-	remote_con_data.addr = ntohll(tmp_con_data.addr);
-	remote_con_data.rkey = ntohl(tmp_con_data.rkey);
-	remote_con_data.qp_num = ntohl(tmp_con_data.qp_num);
-	remote_con_data.lid = ntohs(tmp_con_data.lid);
-	memcpy(remote_con_data.gid, tmp_con_data.gid, 16);
-	/* save the remote side attributes, we will need it for the post SR */
-	res->remote_props = remote_con_data;
-	fprintf(stdout, "Remote address = 0x%" PRIx64 "\n", remote_con_data.addr);
-	fprintf(stdout, "Remote rkey = 0x%x\n", remote_con_data.rkey);
-	fprintf(stdout, "Remote QP number = 0x%x\n", remote_con_data.qp_num);
-	fprintf(stdout, "Remote LID = 0x%x\n", remote_con_data.lid);
-	if (config.gid_idx >= 0)
-	{
-		uint8_t* p = remote_con_data.gid;
-		fprintf(stdout, "Remote GID =%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\n ", p[0],
-			p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
-	}
-	/* modify the QP to init */
-	rc = modify_qp_to_init(res->qp);
-	if (rc)
-	{
-		fprintf(stderr, "change QP state to INIT failed\n");
-		goto connect_qp_exit;
-	}
-	/* let the client post RR to be prepared for incoming messages */
-	if (config.server_name)
-	{
-		rc = post_receive(res);
-		if (rc)
-		{
-			fprintf(stderr, "failed to post RR\n");
-			goto connect_qp_exit;
-		}
-	}
-	/* modify the QP to RTR */
-	rc = modify_qp_to_rtr(res->qp, remote_con_data.qp_num, remote_con_data.lid, remote_con_data.gid);
-	if (rc)
-	{
-		fprintf(stderr, "failed to modify QP state to RTR\n");
-		goto connect_qp_exit;
-	}
-	rc = modify_qp_to_rts(res->qp);
-	if (rc)
-	{
-		fprintf(stderr, "failed to modify QP state to RTR\n");
-		goto connect_qp_exit;
-	}
-	fprintf(stdout, "QP state was change to RTS\n");
-	/* sync to make sure that both sides are in states that they can connect to prevent packet loose */
-	if (sock_sync_data(res->sock, 1, "Q", &temp_char)) /* just send a dummy char back and forth */
-	{
-		fprintf(stderr, "sync error after QPs are were moved to RTS\n");
-		rc = 1;
-	}
-connect_qp_exit:
-	return rc;
-}
+
 /******************************************************************************
 * Function: resources_destroy
 *

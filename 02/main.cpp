@@ -4,6 +4,8 @@ int main (int argc, char *argv[]) {
 	struct resources res;
 	int rc = 1;
 	char temp_char;
+	std::chrono::steady_clock::time_point start;
+	std::chrono::steady_clock::time_point end;
 	/* parse the command line parameters */
 	while (1)
 	{
@@ -75,25 +77,36 @@ int main (int argc, char *argv[]) {
 		goto main_exit;
 	}
 	/* let the server post the sr */
+	
 	if (!config.server_name)
+		//void* = start;
+		 start = std::chrono::steady_clock::now();
+		
 		if (post_send(&res, IBV_WR_SEND))
 		{
 			fprintf(stderr, "failed to post sr\n");
 			goto main_exit;
 		}
 	/* in both sides we expect to get a completion */
+	//void* end;
+	
 	if (poll_completion(&res))
-	{
+	{	
+		
 		fprintf(stderr, "poll completion failed\n");
 		goto main_exit;
 	}
+	end = std::chrono::steady_clock::now();
 	/* after polling the completion we have the message in the client buffer too */
 	if (config.server_name)
-		fprintf(stdout, "Message is: '%s'\n", res.buf);
+		fprintf(stdout, "Message is: \n");
 	else
-	{
+	{	
+		std::cout << "SEND Elapsed time in nanoseconds :"
+			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+			<< " ns" << std::endl;
 		/* setup server buffer with read message */
-		strcpy(res.buf, RDMAMSGR);
+		//strcpy(res.buf, RDMAMSGR);
 	}
 	/* Sync so we are sure server side has data ready before client tries to read it */
 	if (sock_sync_data(res.sock, 1, "R", &temp_char)) /* just send a dummy char back and forth */
@@ -103,10 +116,11 @@ int main (int argc, char *argv[]) {
 		goto main_exit;
 	}
 	/* Now the client performs an RDMA read and then write on server.
-Note that the server has no idea these events have occured */
+	Note that the server has no idea these events have occured */
 	if (config.server_name)
 	{
 		/* First we read contens of server's buffer */
+		start = std::chrono::steady_clock::now();
 		if (post_send(&res, IBV_WR_RDMA_READ))
 		{
 			fprintf(stderr, "failed to post SR 2\n");
@@ -114,15 +128,22 @@ Note that the server has no idea these events have occured */
 			goto main_exit;
 		}
 		if (poll_completion(&res))
-		{
+		{	
+			
 			fprintf(stderr, "poll completion failed 2\n");
 			rc = 1;
 			goto main_exit;
 		}
-		fprintf(stdout, "Contents of server's buffer: '%s'\n", res.buf);
+		end = std::chrono::steady_clock::now();
+		//fprintf(stdout, "Contents of server's buffer: '%s'\n", res.buf);
+		std::cout << "RDMA READ Elapsed time in nanoseconds :"
+			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+			<< " ns" << std::endl;
+
 		/* Now we replace what's in the server's buffer */
-		strcpy(res.buf, RDMAMSGW);
+		//strcpy(res.buf, RDMAMSGW);
 		fprintf(stdout, "Now replacing it with: '%s'\n", res.buf);
+		start = std::chrono::steady_clock::now();
 		if (post_send(&res, IBV_WR_RDMA_WRITE))
 		{
 			fprintf(stderr, "failed to post SR 3\n");
@@ -135,6 +156,11 @@ Note that the server has no idea these events have occured */
 			rc = 1;
 			goto main_exit;
 		}
+		end = std::chrono::steady_clock::now();
+
+		std::cout << "RDMA WRITE Elapsed time in nanoseconds :"
+			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+			<< " ns" << std::endl;
 	}
 	/* Sync so server will know that client is done mucking with its memory */
 	if (sock_sync_data(res.sock, 1, "W", &temp_char)) /* just send a dummy char back and forth */
@@ -143,8 +169,8 @@ Note that the server has no idea these events have occured */
 		rc = 1;
 		goto main_exit;
 	}
-	if (!config.server_name)
-		fprintf(stdout, "Contents of server buffer: '%s'\n", res.buf);
+	/*if (!config.server_name)
+		fprintf(stdout, "Contents of server buffer: '%s'\n", res.buf);*/
 	rc = 0;
 main_exit:
 	if (resources_destroy(&res))

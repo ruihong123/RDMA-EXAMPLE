@@ -19,17 +19,19 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#ifdef __cplusplus
-extern "C" { //only need to export C interface if
-// used by C++ source code
-#endif
+#include <chrono>
+#include <iostream>
+//#ifdef __cplusplus
+//extern "C" { //only need to export C interface if
+//// used by C++ source code
+//#endif
 
 /* poll CQ timeout in millisec (2 seconds) */
 #define MAX_POLL_CQ_TIMEOUT 2000
 #define MSG "SEND operation "
 #define RDMAMSGR "RDMA read operation "
 #define RDMAMSGW "RDMA write operation"
-#define MSG_SIZE (strlen(MSG) + 1)
+#define MSG_SIZE (1024*1024)
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 	static inline uint64_t htonll(uint64_t x) { return bswap_64(x); }
 	static inline uint64_t ntohll(uint64_t x) { return bswap_64(x); }
@@ -97,8 +99,8 @@ extern "C" { //only need to export C interface if
 	void print_config(void);
 	void usage(const char* argv0);
 
-#ifdef __cplusplus
-}
-#endif
+//#ifdef __cplusplus
+//}
+//#endif
 
 #endif
