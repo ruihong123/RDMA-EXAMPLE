@@ -6,7 +6,15 @@ int main (int argc, char *argv[]) {
 	char temp_char;
 	std::chrono::steady_clock::time_point start;
 	std::chrono::steady_clock::time_point end;
-	
+	char* p1 = new char[msg_size];
+	char* p2 = new char[msg_size];
+	memset(p1, 0, msg_size);
+	start = std::chrono::steady_clock::now();
+	memcpy(p2, p1, msg_size);
+	end = std::chrono::steady_clock::now();
+	std::cout << "memory copy Elapsed time in nanoseconds :"
+		<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+		<< " ns" << std::endl;
 	/* parse the command line parameters */
 	while (1)
 	{
@@ -169,6 +177,7 @@ int main (int argc, char *argv[]) {
 	/*if (!config.server_name)
 		fprintf(stdout, "Contents of server buffer: '%s'\n", res.buf);*/
 	rc = 0;
+	
 main_exit:
 	if (resources_destroy(&res))
 	{
