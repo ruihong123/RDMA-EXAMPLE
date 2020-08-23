@@ -44,7 +44,7 @@ include rules.ninja
 build cmake_object_order_depends_target_myprog_Debug: phony || cmake_object_order_depends_target_rdma_Debug
 
 build CMakeFiles\myprog.dir\main.cpp.obj: CXX_COMPILER__myprog_Debug ..\..\..\main.cpp || cmake_object_order_depends_target_myprog_Debug
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  FLAGS = -std=c++0x /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\$(PROJECT_SOURCE_DIR)
   OBJECT_DIR = CMakeFiles\myprog.dir
   OBJECT_FILE_DIR = CMakeFiles\myprog.dir
@@ -60,7 +60,7 @@ build CMakeFiles\myprog.dir\main.cpp.obj: CXX_COMPILER__myprog_Debug ..\..\..\ma
 # Link the executable myprog.exe
 
 build myprog.exe: CXX_EXECUTABLE_LINKER__myprog_Debug CMakeFiles\myprog.dir\main.cpp.obj | rdma.lib || rdma.dll
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  FLAGS = -std=c++0x /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = rdma.lib  ibverbs.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = CMakeFiles\myprog.dir
@@ -82,7 +82,7 @@ build cmake_object_order_depends_target_rdma_Debug: phony || CMakeFiles\rdma.dir
 
 build CMakeFiles\rdma.dir\rdma.cpp.obj: CXX_COMPILER__rdma_Debug ..\..\..\rdma.cpp || cmake_object_order_depends_target_rdma_Debug
   DEFINES = -Drdma_EXPORTS
-  FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  FLAGS = -std=c++0x /MDd /Zi /Ob0 /Od /RTC1
   INCLUDES = -I..\..\..\$(PROJECT_SOURCE_DIR)
   OBJECT_DIR = CMakeFiles\rdma.dir
   OBJECT_FILE_DIR = CMakeFiles\rdma.dir
@@ -98,7 +98,7 @@ build CMakeFiles\rdma.dir\rdma.cpp.obj: CXX_COMPILER__rdma_Debug ..\..\..\rdma.c
 # Link the shared library rdma.dll
 
 build rdma.dll rdma.lib: CXX_SHARED_LIBRARY_LINKER__rdma_Debug CMakeFiles\rdma.dir\rdma.cpp.obj
-  LANGUAGE_COMPILE_FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Zi /Ob0 /Od /RTC1
+  LANGUAGE_COMPILE_FLAGS = -std=c++0x /MDd /Zi /Ob0 /Od /RTC1
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL
   LINK_LIBRARIES = ibverbs.lib  kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib
   OBJECT_DIR = CMakeFiles\rdma.dir
