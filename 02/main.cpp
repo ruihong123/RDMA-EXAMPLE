@@ -78,15 +78,18 @@ int main (int argc, char *argv[]) {
 	}
 	/* let the server post the sr */
 	
-	if (!config.server_name)
-		//void* = start;
-		 start = std::chrono::steady_clock::now();
-		
+	if (!config.server_name) {
+		start = std::chrono::steady_clock::now();
+
 		if (post_send(&res, IBV_WR_SEND))
 		{
 			fprintf(stderr, "failed to post sr\n");
 			goto main_exit;
 		}
+
+	}
+		//void* = start;
+		 
 	/* in both sides we expect to get a completion */
 	//void* end;
 	
