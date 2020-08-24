@@ -5,7 +5,7 @@ std::chrono::steady_clock::time_point end;
 int main (int argc, char *argv[]) { 
 	struct resources res;
 	int rc = 1;
-	int trans_times;
+	//int trans_times;
 	char temp_char;
 	
 	char* p1 = new char[msg_size];
@@ -141,7 +141,7 @@ int main (int argc, char *argv[]) {
 	{
 		/* First we read contens of server's buffer */
 		
-		for (int i = 0; i < trans_times; i++) {
+		//for (int i = 0; i < trans_times; i++) {
 			if (post_send(&res, IBV_WR_RDMA_READ))
 			{
 				fprintf(stderr, "failed to post SR 2\n");
@@ -155,11 +155,11 @@ int main (int argc, char *argv[]) {
 				rc = 1;
 				goto main_exit;
 			}
-		}
+		//}
 		
 		
 		//fprintf(stdout, "Contents of server's buffer: '%s'\n", res.buf);
-		std::cout << trans_times <<"times RDMA READ Elapsed time in nanoseconds :"
+		std::cout <<"RDMA READ Elapsed time in nanoseconds :"
 			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
 			<< " ns" << std::endl;
 
@@ -167,7 +167,7 @@ int main (int argc, char *argv[]) {
 		//strcpy(res.buf, RDMAMSGW);
 		//fprintf(stdout, "Now replacing it with: '%s'\n", res.buf);
 		
-		for (int i = 0; i < trans_times; i++) {
+		//for (int i = 0; i < trans_times; i++) {
 			if (post_send(&res, IBV_WR_RDMA_WRITE))
 			{
 				fprintf(stderr, "failed to post SR 3\n");
@@ -180,9 +180,9 @@ int main (int argc, char *argv[]) {
 				rc = 1;
 				goto main_exit;
 			}
-		}
+		//}
 
-		std::cout << trans_times <<"time RDMA WRITE Elapsed time in nanoseconds :"
+		std::cout << "RDMA WRITE Elapsed time in nanoseconds :"
 			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
 			<< " ns" << std::endl;
 	}
