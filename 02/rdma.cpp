@@ -122,7 +122,7 @@ int sock_sync_data(int sock, int xfer_size, char* local_data, char* remote_data)
 	int total_read_bytes = 0;
 	rc = write(sock, local_data, xfer_size);
 	if (rc < xfer_size)
-		fprintf(stderr, "Failed writing data during sock_sync_data\n");
+		fprintf(stderr, "Failed writing data during sock_sync_data, total bytes are %d\n", rc);
 	else
 		rc = 0;
 	while (!rc && total_read_bytes < xfer_size)
