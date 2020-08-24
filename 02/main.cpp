@@ -74,7 +74,7 @@ int main (int argc, char *argv[]) {
 		goto main_exit;
 	}
 	start = std::chrono::steady_clock::now();
-	sock_sync_data(res.sock, 1, p1, p2);
+	sock_sync_data(res.sock, msg_size, p1, p2);
 	end = std::chrono::steady_clock::now();
 	std::cout << "socket Elapsed time in nanoseconds :"
 		<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
