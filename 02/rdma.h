@@ -28,7 +28,7 @@
 //#endif
 
 /* poll CQ timeout in millisec (2 seconds) */
-#define MAX_POLL_CQ_TIMEOUT 2000
+#define MAX_POLL_CQ_TIMEOUT 10000
 #define MSG "SEND operation "
 #define RDMAMSGR "RDMA read operation "
 #define RDMAMSGW "RDMA write operation"

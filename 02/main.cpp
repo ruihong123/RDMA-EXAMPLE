@@ -1,14 +1,17 @@
 #include <rdma.h>
 int msg_size;
+std::chrono::steady_clock::time_point start;
+std::chrono::steady_clock::time_point end;
 int main (int argc, char *argv[]) { 
 	struct resources res;
 	int rc = 1;
+	int trans_times;
 	char temp_char;
-	std::chrono::steady_clock::time_point start;
-	std::chrono::steady_clock::time_point end;
+	
 	char* p1 = new char[msg_size];
 	char* p2 = new char[msg_size];
 	memset(p1, 0, msg_size);
+	memset(p2, 1, msg_size);
 	start = std::chrono::steady_clock::now();
 	memcpy(p2, p1, msg_size);
 	end = std::chrono::steady_clock::now();
@@ -37,6 +40,7 @@ int main (int argc, char *argv[]) {
 		//}
 		struct option long_options[] = {
 			{name: "msg_size", has_arg : 1, flag : nullptr, val : 's'},
+			//{name: "transmit times", has_arg : 1, flag : nullptr, val : 'n'},
 			{name: nullptr, has_arg : 0, flag : nullptr, val : '\0'}
 		};
 		c = getopt_long(argc, argv, "s:", long_options, nullptr);
@@ -44,8 +48,11 @@ int main (int argc, char *argv[]) {
 			break;
 		switch (c)
 		{
-		case 's':
-			msg_size = std::stoi(optarg); 
+		//case 's':
+		//	msg_size = std::stoi(optarg); 
+		//	break;
+		case 'n':
+			trans_times = std::stoi(optarg);
 			break;
 		default:
 			usage(argv[0]);
@@ -89,7 +96,7 @@ int main (int argc, char *argv[]) {
 	/* let the server post the sr */
 	
 	if (!config.server_name) {
-		start = std::chrono::steady_clock::now();
+		
 
 		if (post_send(&res, IBV_WR_SEND))
 		{
@@ -109,7 +116,7 @@ int main (int argc, char *argv[]) {
 		fprintf(stderr, "poll completion failed\n");
 		goto main_exit;
 	}
-	end = std::chrono::steady_clock::now();
+	
 	/* after polling the completion we have the message in the client buffer too */
 	if (config.server_name)
 		fprintf(stdout, "Message is: \n");
@@ -133,45 +140,49 @@ int main (int argc, char *argv[]) {
 	if (config.server_name)
 	{
 		/* First we read contens of server's buffer */
-		start = std::chrono::steady_clock::now();
-		if (post_send(&res, IBV_WR_RDMA_READ))
-		{
-			fprintf(stderr, "failed to post SR 2\n");
-			rc = 1;
-			goto main_exit;
+		
+		for (int i = 0; i < trans_times; i++) {
+			if (post_send(&res, IBV_WR_RDMA_READ))
+			{
+				fprintf(stderr, "failed to post SR 2\n");
+				rc = 1;
+				goto main_exit;
+			}
+			if (poll_completion(&res))
+			{
+
+				fprintf(stderr, "poll completion failed 2\n");
+				rc = 1;
+				goto main_exit;
+			}
 		}
-		if (poll_completion(&res))
-		{	
-			
-			fprintf(stderr, "poll completion failed 2\n");
-			rc = 1;
-			goto main_exit;
-		}
-		end = std::chrono::steady_clock::now();
+		
+		
 		//fprintf(stdout, "Contents of server's buffer: '%s'\n", res.buf);
-		std::cout << "RDMA READ Elapsed time in nanoseconds :"
+		std::cout << trans_times <<"times RDMA READ Elapsed time in nanoseconds :"
 			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
 			<< " ns" << std::endl;
 
 		/* Now we replace what's in the server's buffer */
 		//strcpy(res.buf, RDMAMSGW);
-		fprintf(stdout, "Now replacing it with: '%s'\n", res.buf);
-		start = std::chrono::steady_clock::now();
-		if (post_send(&res, IBV_WR_RDMA_WRITE))
-		{
-			fprintf(stderr, "failed to post SR 3\n");
-			rc = 1;
-			goto main_exit;
+		//fprintf(stdout, "Now replacing it with: '%s'\n", res.buf);
+		
+		for (int i = 0; i < trans_times; i++) {
+			if (post_send(&res, IBV_WR_RDMA_WRITE))
+			{
+				fprintf(stderr, "failed to post SR 3\n");
+				rc = 1;
+				goto main_exit;
+			}
+			if (poll_completion(&res))
+			{
+				fprintf(stderr, "poll completion failed 3\n");
+				rc = 1;
+				goto main_exit;
+			}
 		}
-		if (poll_completion(&res))
-		{
-			fprintf(stderr, "poll completion failed 3\n");
-			rc = 1;
-			goto main_exit;
-		}
-		end = std::chrono::steady_clock::now();
 
-		std::cout << "RDMA WRITE Elapsed time in nanoseconds :"
+		std::cout << trans_times <<"time RDMA WRITE Elapsed time in nanoseconds :"
 			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
 			<< " ns" << std::endl;
 	}
