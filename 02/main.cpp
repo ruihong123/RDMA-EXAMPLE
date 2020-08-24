@@ -73,12 +73,13 @@ int main (int argc, char *argv[]) {
 		fprintf(stderr, "failed to create resources\n");
 		goto main_exit;
 	}
+	/*
 	start = std::chrono::steady_clock::now();
 	sock_sync_data(res.sock, msg_size, p1, p2);
 	end = std::chrono::steady_clock::now();
 	std::cout << "socket Elapsed time in nanoseconds :"
 		<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
-		<< " ns" << std::endl;
+		<< " ns" << std::endl;*/
 	/* connect the QPs */
 	if (connect_qp(&res))
 	{
