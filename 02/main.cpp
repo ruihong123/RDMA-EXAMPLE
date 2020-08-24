@@ -48,12 +48,12 @@ int main (int argc, char *argv[]) {
 			break;
 		switch (c)
 		{
-		//case 's':
-		//	msg_size = std::stoi(optarg); 
-		//	break;
-		case 'n':
-			trans_times = std::stoi(optarg);
+		case 's':
+			msg_size = std::stoi(optarg); 
 			break;
+		/*case 'n':
+			trans_times = std::stoi(optarg);
+			break;*/
 		default:
 			usage(argv[0]);
 			return 1;
