@@ -803,7 +803,7 @@ int resources_destroy(struct resources* res)
 			rc = 1;
 		}
 	if (res->buf)
-		free(res->buf);
+		delete res->buf;
 	if (res->cq)
 		if (ibv_destroy_cq(res->cq))
 		{
