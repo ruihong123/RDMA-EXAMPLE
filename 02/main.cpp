@@ -162,7 +162,7 @@ int main (int argc, char *argv[]) {
 		
 		//fprintf(stdout, "Contents of server's buffer: '%s'\n", res.buf);
 		std::cout <<"RDMA READ Elapsed time in nanoseconds :"
-			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/500.00
 			<< " ns" << std::endl;
 
 		/* Now we replace what's in the server's buffer */
@@ -183,7 +183,7 @@ int main (int argc, char *argv[]) {
 		}
 		end = std::chrono::steady_clock::now();
 		std::cout << "RDMA WRITE Elapsed time in nanoseconds :"
-			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/500.00
 			<< " ns" << std::endl;
 	}
 	/* Sync so server will know that client is done mucking with its memory */
