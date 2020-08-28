@@ -17,10 +17,14 @@ int main(int argc, char* argv[]) {
 	memset(p1, 5, msg_size);
 	memset(p2, 6, msg_size);
 	cycles_t start = get_cycles();
-	memcpy(p2, p1, msg_size);
+	for (int i = 0; i < 1000; i++) {
+
+		memcpy(p2, p1, msg_size);
+	}
+	
 	cycles_t end = get_cycles();
 	double bw_avg = end - start;//((double)(msg_size)*cycles_to_units) / ((end - start) * format_factor);
 	std::cout << "memory copy Elapsed time  :"
-		<< bw_avg
+		<< bw_avg/1000
 		<< " cycles" << std::endl;
 }
