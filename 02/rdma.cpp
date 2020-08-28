@@ -531,7 +531,6 @@ int post_send(struct resources* res, int opcode)
 	}
 	/* there is a Receive Request in the responder side, so we won't get any into RNR flow */
 	//*(start) = std::chrono::steady_clock::now();
-	start = std::chrono::steady_clock::now();
 	rc = ibv_post_send(res->qp, &sr, &bad_wr);
 	if (rc)
 		fprintf(stderr, "failed to post SR\n");
@@ -632,7 +631,6 @@ int poll_completion(struct resources* res)
 		cur_time_msec = (cur_time.tv_sec * 1000) + (cur_time.tv_usec / 1000);
 	} while ((poll_result == 0) && ((cur_time_msec - start_time_msec) < MAX_POLL_CQ_TIMEOUT));
 	//*(end) = std::chrono::steady_clock::now();
-	end = std::chrono::steady_clock::now();
 	if (poll_result < 0)
 	{
 		/* poll CQ failed */

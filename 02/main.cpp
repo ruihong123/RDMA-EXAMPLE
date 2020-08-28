@@ -8,16 +8,16 @@ int main (int argc, char *argv[]) {
 	//int trans_times;
 	char temp_char;
 	
-	char* p1 = new char[msg_size];
-	char* p2 = new char[msg_size];
-	memset(p1, 0, msg_size);
-	memset(p2, 1, msg_size);
-	start = std::chrono::steady_clock::now();
-	memcpy(p2, p1, msg_size);
-	end = std::chrono::steady_clock::now();
-	std::cout << "memory copy Elapsed time in nanoseconds :"
-		<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
-		<< " ns" << std::endl;
+	//char* p1 = new char[msg_size];
+	//char* p2 = new char[msg_size];
+	//memset(p1, 0, msg_size);
+	//memset(p2, 1, msg_size);
+	//start = std::chrono::steady_clock::now();
+	//memcpy(p2, p1, msg_size);
+	//end = std::chrono::steady_clock::now();
+	//std::cout << "memory copy Elapsed time in nanoseconds :"
+	//	<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+	//	<< " ns" << std::endl;
 	
 	/* parse the command line parameters */
 	while (1)
@@ -140,8 +140,8 @@ int main (int argc, char *argv[]) {
 	if (config.server_name)
 	{
 		/* First we read contens of server's buffer */
-		
-		//for (int i = 0; i < trans_times; i++) {
+		start = std::chrono::steady_clock::now();
+		for (int i = 0; i < 500; i++) {
 			if (post_send(&res, IBV_WR_RDMA_READ))
 			{
 				fprintf(stderr, "failed to post SR 2\n");
@@ -155,7 +155,9 @@ int main (int argc, char *argv[]) {
 				rc = 1;
 				goto main_exit;
 			}
-		//}
+		}
+		end = std::chrono::steady_clock::now();
+		
 		
 		
 		//fprintf(stdout, "Contents of server's buffer: '%s'\n", res.buf);
@@ -164,10 +166,8 @@ int main (int argc, char *argv[]) {
 			<< " ns" << std::endl;
 
 		/* Now we replace what's in the server's buffer */
-		//strcpy(res.buf, RDMAMSGW);
-		//fprintf(stdout, "Now replacing it with: '%s'\n", res.buf);
-		
-		//for (int i = 0; i < trans_times; i++) {
+		start = std::chrono::steady_clock::now();
+		for (int i = 0; i < 500; i++) {
 			if (post_send(&res, IBV_WR_RDMA_WRITE))
 			{
 				fprintf(stderr, "failed to post SR 3\n");
@@ -180,8 +180,8 @@ int main (int argc, char *argv[]) {
 				rc = 1;
 				goto main_exit;
 			}
-		//}
-
+		}
+		end = std::chrono::steady_clock::now();
 		std::cout << "RDMA WRITE Elapsed time in nanoseconds :"
 			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
 			<< " ns" << std::endl;
