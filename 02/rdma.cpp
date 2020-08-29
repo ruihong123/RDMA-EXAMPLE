@@ -537,7 +537,7 @@ int post_send(struct resources* res, int opcode)
 		fprintf(stderr, "failed to post SR\n");
 	else
 	{
-		switch (opcode)
+		/*switch (opcode)
 		{
 		case IBV_WR_SEND:
 			fprintf(stdout, "Send Request was posted\n");
@@ -551,7 +551,7 @@ int post_send(struct resources* res, int opcode)
 		default:
 			fprintf(stdout, "Unknown Request was posted\n");
 			break;
-		}
+		}*/
 	}
 	return rc;
 }
@@ -647,7 +647,7 @@ int poll_completion(struct resources* res)
 	else
 	{
 		/* CQE found */
-		fprintf(stdout, "completion was found in CQ with status 0x%x\n", wc.status);
+		//fprintf(stdout, "completion was found in CQ with status 0x%x\n", wc.status);
 		/* check the completion status (here we don't care about the completion opcode */
 		if (wc.status != IBV_WC_SUCCESS)
 		{
