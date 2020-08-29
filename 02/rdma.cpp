@@ -455,9 +455,9 @@ int connect_qp(struct resources* res)
 	/* let the client post RR to be prepared for incoming messages */
 	if (config.server_name)
 	{	
-		for (int i = 0; i < iter; i++) {
-			rc = post_receive(res, i);
-		}
+		//for (int i = 0; i < iter; i++) {
+		rc = post_receives(res, iter);
+		//}
 		
 		if (rc)
 		{
@@ -574,30 +574,45 @@ int post_send(struct resources* res, int opcode)
 * Description
 *
 ******************************************************************************/
-int post_receive(struct resources* res, int id)
+int post_receives(struct resources* res, int len)
 {
-	struct ibv_recv_wr rr;
+	
 	struct ibv_sge sge;
 	struct ibv_recv_wr* bad_wr;
 	int rc;
 	extern int msg_size;
+	res->rr = new ibv_recv_wr[len];
 	/* prepare the scatter/gather entry */
 	memset(&sge, 0, sizeof(sge));
 	sge.addr = (uintptr_t)res->buf;
 	sge.length = msg_size;
 	sge.lkey = res->mr->lkey;
 	/* prepare the receive work request */
-	memset(&rr, 0, sizeof(rr));
-	rr.next = NULL;
-	rr.wr_id = id;
-	rr.sg_list = &sge;
-	rr.num_sge = 1;
+	memset(res->rr, 0, sizeof(*(res->rr)));
+	for (int i = 0; i < len; i++) {
+		
+		res->rr[i].next = NULL;
+		res->rr[i].wr_id = i;
+		res->rr[i].sg_list = &sge;
+		res->rr[i].num_sge = 1;
+	}
+	for (int i = 0; i < len-1; i++) {
+		res->rr[i].next = &(res->rr[i+1]);
+	}
+	
+	
 	/* post the Receive Request to the RQ */
-	rc = ibv_post_recv(res->qp, &rr, &bad_wr);
-	if (rc)
-		fprintf(stderr, "failed to post RR\n");
-	else
-		fprintf(stdout, "Receive Request was posted\n");
+	for (int i = 0; i < len; i++) {
+		rc = ibv_post_recv(res->qp, &(res->rr[i]), &bad_wr);
+		if (rc) {
+			fprintf(stderr, "failed to post RR\n");
+			break;
+		}
+			
+		else
+			fprintf(stdout, "Receive Request was posted\n");
+	}
+	
 	return rc;
 }
 /* poll_completion */

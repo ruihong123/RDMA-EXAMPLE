@@ -67,6 +67,7 @@
 		struct ibv_device_attr
 			device_attr;
 		/* Device attributes */
+		struct ibv_recv_wr*	rr;
 		struct ibv_port_attr port_attr;	/* IB port attributes */
 		struct cm_con_data_t remote_props; /* values to connect to remote side */
 		struct ibv_context* ib_ctx;		   /* device handle */
@@ -89,7 +90,7 @@
 	int sock_sync_data(int sock, int xfer_size, char* local_data, char* remote_data);
 	int poll_completion(struct resources* res);
 	int post_send(struct resources* res, int opcode);
-	int post_receive(struct resources* res, int i);
+	int post_receives(struct resources* res, int len);
 	void resources_init(struct resources* res);
 	int resources_create(struct resources* res);
 	int modify_qp_to_init(struct ibv_qp* qp);
