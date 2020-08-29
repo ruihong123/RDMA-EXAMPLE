@@ -456,7 +456,7 @@ int connect_qp(struct resources* res)
 	if (config.server_name)
 	{	
 		for (int i = 0; i < iter; i++) {
-			rc = post_receive(res);
+			rc = post_receive(res, i);
 		}
 		
 		if (rc)
@@ -574,7 +574,7 @@ int post_send(struct resources* res, int opcode)
 * Description
 *
 ******************************************************************************/
-int post_receive(struct resources* res)
+int post_receive(struct resources* res, int id)
 {
 	struct ibv_recv_wr rr;
 	struct ibv_sge sge;
@@ -589,7 +589,7 @@ int post_receive(struct resources* res)
 	/* prepare the receive work request */
 	memset(&rr, 0, sizeof(rr));
 	rr.next = NULL;
-	rr.wr_id = 0;
+	rr.wr_id = id;
 	rr.sg_list = &sge;
 	rr.num_sge = 1;
 	/* post the Receive Request to the RQ */

@@ -89,7 +89,7 @@
 	int sock_sync_data(int sock, int xfer_size, char* local_data, char* remote_data);
 	int poll_completion(struct resources* res);
 	int post_send(struct resources* res, int opcode);
-	int post_receive(struct resources* res);
+	int post_receive(struct resources* res, int i);
 	void resources_init(struct resources* res);
 	int resources_create(struct resources* res);
 	int modify_qp_to_init(struct ibv_qp* qp);
