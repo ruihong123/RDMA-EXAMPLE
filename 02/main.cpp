@@ -97,7 +97,7 @@ int main (int argc, char *argv[]) {
 	
 	if (!config.server_name) {
 		
-
+		start = std::chrono::steady_clock::now();
 		if (post_send(&res, IBV_WR_SEND))
 		{
 			fprintf(stderr, "failed to post sr\n");
@@ -116,6 +116,7 @@ int main (int argc, char *argv[]) {
 		fprintf(stderr, "poll completion failed\n");
 		goto main_exit;
 	}
+	end = std::chrono::steady_clock::now();
 	
 	/* after polling the completion we have the message in the client buffer too */
 	if (config.server_name)
@@ -140,7 +141,7 @@ int main (int argc, char *argv[]) {
 	if (config.server_name)
 	{
 		/* First we read contens of server's buffer */
-		//start = std::chrono::steady_clock::now();
+		start = std::chrono::steady_clock::now();
 		for (int i = 0; i < 500; i++) {
 			if (post_send(&res, IBV_WR_RDMA_READ))
 			{
@@ -156,7 +157,7 @@ int main (int argc, char *argv[]) {
 				goto main_exit;
 			}
 		}
-		//end = std::chrono::steady_clock::now();
+		end = std::chrono::steady_clock::now();
 		
 		
 		
@@ -166,7 +167,7 @@ int main (int argc, char *argv[]) {
 			<< " ns" << std::endl;
 
 		/* Now we replace what's in the server's buffer */
-		//start = std::chrono::steady_clock::now();
+		start = std::chrono::steady_clock::now();
 		for (int i = 0; i < 500; i++) {
 			if (post_send(&res, IBV_WR_RDMA_WRITE))
 			{
@@ -181,7 +182,7 @@ int main (int argc, char *argv[]) {
 				goto main_exit;
 			}
 		}
-		//end = std::chrono::steady_clock::now();
+		end = std::chrono::steady_clock::now();
 		std::cout << "RDMA WRITE Elapsed time in nanoseconds :"
 			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/500.00
 			<< " ns" << std::endl;
