@@ -2,6 +2,7 @@
 int msg_size;
 std::chrono::steady_clock::time_point start;
 std::chrono::steady_clock::time_point end;
+int iter = 500;
 int main (int argc, char *argv[]) { 
 	struct resources res;
 	int rc = 1;
@@ -94,28 +95,31 @@ int main (int argc, char *argv[]) {
 		goto main_exit;
 	}
 	/* let the server post the sr */
-	
-	if (!config.server_name) {
-		
-		start = std::chrono::steady_clock::now();
-		if (post_send(&res, IBV_WR_SEND))
+	start = std::chrono::steady_clock::now();
+	for (int i = 0; i < iter; i++) {
+		if (!config.server_name) {
+
+
+			if (post_send(&res, IBV_WR_SEND))
+			{
+				fprintf(stderr, "failed to post sr\n");
+				goto main_exit;
+			}
+
+		}
+		//void* = start;
+
+		/* in both sides we expect to get a completion */
+		//void* end;
+
+		if (poll_completion(&res))
 		{
-			fprintf(stderr, "failed to post sr\n");
+
+			fprintf(stderr, "poll completion failed\n");
 			goto main_exit;
 		}
-
 	}
-		//void* = start;
-		 
-	/* in both sides we expect to get a completion */
-	//void* end;
 	
-	if (poll_completion(&res))
-	{	
-		
-		fprintf(stderr, "poll completion failed\n");
-		goto main_exit;
-	}
 	end = std::chrono::steady_clock::now();
 	
 	/* after polling the completion we have the message in the client buffer too */
@@ -124,7 +128,7 @@ int main (int argc, char *argv[]) {
 	else
 	{	
 		std::cout << "SEND Elapsed time in nanoseconds :"
-			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/ (double)(iter)
 			<< " ns" << std::endl;
 		/* setup server buffer with read message */
 		//strcpy(res.buf, RDMAMSGR);
@@ -142,7 +146,7 @@ int main (int argc, char *argv[]) {
 	{
 		/* First we read contens of server's buffer */
 		start = std::chrono::steady_clock::now();
-		for (int i = 0; i < 500; i++) {
+		for (int i = 0; i < iter; i++) {
 			if (post_send(&res, IBV_WR_RDMA_READ))
 			{
 				fprintf(stderr, "failed to post SR 2\n");
@@ -163,12 +167,12 @@ int main (int argc, char *argv[]) {
 		
 		//fprintf(stdout, "Contents of server's buffer: '%s'\n", res.buf);
 		std::cout <<"RDMA READ Elapsed time in nanoseconds :"
-			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/500.00
+			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/ (double)(iter)
 			<< " ns" << std::endl;
 
 		/* Now we replace what's in the server's buffer */
 		start = std::chrono::steady_clock::now();
-		for (int i = 0; i < 500; i++) {
+		for (int i = 0; i < iter; i++) {
 			if (post_send(&res, IBV_WR_RDMA_WRITE))
 			{
 				fprintf(stderr, "failed to post SR 3\n");
@@ -184,7 +188,7 @@ int main (int argc, char *argv[]) {
 		}
 		end = std::chrono::steady_clock::now();
 		std::cout << "RDMA WRITE Elapsed time in nanoseconds :"
-			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/500.00
+			<< std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()/(double)(iter)
 			<< " ns" << std::endl;
 	}
 	/* Sync so server will know that client is done mucking with its memory */

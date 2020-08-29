@@ -397,6 +397,7 @@ resources_create_exit:
 ******************************************************************************/
 int connect_qp(struct resources* res)
 {
+	extern int iter;
 	struct cm_con_data_t local_con_data;
 	struct cm_con_data_t remote_con_data;
 	struct cm_con_data_t tmp_con_data;
@@ -453,8 +454,11 @@ int connect_qp(struct resources* res)
 	}
 	/* let the client post RR to be prepared for incoming messages */
 	if (config.server_name)
-	{
-		rc = post_receive(res);
+	{	
+		for (int i = 0; i < iter; i++) {
+			rc = post_receive(res);
+		}
+		
 		if (rc)
 		{
 			fprintf(stderr, "failed to post RR\n");
