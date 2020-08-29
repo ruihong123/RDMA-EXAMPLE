@@ -2,7 +2,7 @@
 int msg_size;
 std::chrono::steady_clock::time_point start;
 std::chrono::steady_clock::time_point end;
-int iter = 500;
+int iter = 50;
 int main (int argc, char *argv[]) { 
 	struct resources res;
 	int rc = 1;

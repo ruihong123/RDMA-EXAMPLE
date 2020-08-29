@@ -67,6 +67,7 @@
 		struct ibv_device_attr
 			device_attr;
 		/* Device attributes */
+		struct ibv_sge* sge;
 		struct ibv_recv_wr*	rr;
 		struct ibv_port_attr port_attr;	/* IB port attributes */
 		struct cm_con_data_t remote_props; /* values to connect to remote side */

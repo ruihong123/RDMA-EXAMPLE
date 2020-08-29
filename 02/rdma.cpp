@@ -602,16 +602,16 @@ int post_receives(struct resources* res, int len)
 	
 	
 	/* post the Receive Request to the RQ */
-	for (int i = 0; i < len; i++) {
-		rc = ibv_post_recv(res->qp, &(res->rr[i]), &bad_wr);
-		if (rc) {
-			fprintf(stderr, "failed to post RR\n");
-			break;
-		}
-			
-		else
-			fprintf(stdout, "Receive Request was posted\n");
+	//for (int i = 0; i < len; i++) {
+	rc = ibv_post_recv(res->qp, res->rr, &bad_wr);
+	if (rc) {
+		fprintf(stderr, "failed to post RR\n");
+		//break;
 	}
+			
+	else
+		fprintf(stdout, "Receive Request was posted\n");
+	//}
 	
 	return rc;
 }
