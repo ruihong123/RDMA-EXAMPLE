@@ -636,11 +636,12 @@ int post_receive(struct resources* res)
 	struct ibv_recv_wr rr;
 	struct ibv_sge sge;
 	struct ibv_recv_wr* bad_wr;
+	extern int msg_size;
 	int rc;
 	/* prepare the scatter/gather entry */
 	memset(&sge, 0, sizeof(sge));
 	sge.addr = (uintptr_t)res->buf;
-	sge.length = MSG_SIZE;
+	sge.length = msg_size;
 	sge.lkey = res->mr->lkey;
 	/* prepare the receive work request */
 	memset(&rr, 0, sizeof(rr));
