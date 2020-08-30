@@ -278,7 +278,7 @@ int resources_create(struct resources* res)
 		goto resources_create_exit;
 	}
 	/* each side will send only one WR, so Completion Queue with 1 entry is enough */
-	cq_size = 1;
+	cq_size = 1000;
 	res->cq = ibv_create_cq(res->ib_ctx, cq_size, NULL, NULL, 0);
 	if (!res->cq)
 	{
@@ -323,8 +323,8 @@ int resources_create(struct resources* res)
 	qp_init_attr.recv_cq = res->cq;
 	qp_init_attr.cap.max_send_wr = 1000;
 	qp_init_attr.cap.max_recv_wr = 1000;
-	qp_init_attr.cap.max_send_sge = 1000;
-	qp_init_attr.cap.max_recv_sge = 1000;
+	qp_init_attr.cap.max_send_sge = 30;
+	qp_init_attr.cap.max_recv_sge = 30;
 	res->qp = ibv_create_qp(res->pd, &qp_init_attr);
 	if (!res->qp)
 	{
