@@ -179,6 +179,7 @@ int resources_create(struct resources* res)
 	struct ibv_device** dev_list = NULL;
 	struct ibv_qp_init_attr qp_init_attr;
 	struct ibv_device* ib_dev = NULL;
+	extern int iter;
 	size_t size;
 	int i;
 	int mr_flags = 0;
@@ -286,8 +287,8 @@ int resources_create(struct resources* res)
 		goto resources_create_exit;
 	}
 	/* allocate the memory buffer that will hold the data */
-	size = msg_size;
-	res->buf = new char[msg_size];
+	size = msg_size*iter;
+	res->buf = new char[size];
 	if (!res->buf)
 	{
 		fprintf(stderr, "failed to malloc %Zu bytes to memory buffer\n", size);
@@ -577,23 +578,23 @@ int post_send(struct resources* res, int opcode)
 int post_receives(struct resources* res, int len)
 {
 	
-	struct ibv_sge sge;
+	struct ibv_sge sge[len];
 	struct ibv_recv_wr* bad_wr;
 	int rc;
 	extern int msg_size;
 	res->rr = new ibv_recv_wr[len];
 	/* prepare the scatter/gather entry */
-	memset(&sge, 0, sizeof(sge));
-	sge.addr = (uintptr_t)res->buf;
-	sge.length = msg_size;
-	sge.lkey = res->mr->lkey;
+	memset(sge, 0, sizeof(sge));
+	
 	/* prepare the receive work request */
 	memset(res->rr, 0, sizeof(*(res->rr)));
 	for (int i = 0; i < len; i++) {
-		
+		sge[i].addr = (uintptr_t)(&(res->buf[i]));
+		sge[i].length = msg_size;
+		sge[i].lkey = res->mr->lkey;
 		res->rr[i].next = NULL;
 		res->rr[i].wr_id = i;
-		res->rr[i].sg_list = &sge;
+		res->rr[i].sg_list = &sge[i];
 		res->rr[i].num_sge = 1;
 	}
 	for (int i = 0; i < len-1; i++) {
