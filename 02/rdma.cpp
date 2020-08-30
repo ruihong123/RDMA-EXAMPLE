@@ -321,10 +321,10 @@ int resources_create(struct resources* res)
 	qp_init_attr.sq_sig_all = 1;
 	qp_init_attr.send_cq = res->cq;
 	qp_init_attr.recv_cq = res->cq;
-	qp_init_attr.cap.max_send_wr = 1;
-	qp_init_attr.cap.max_recv_wr = 1;
-	qp_init_attr.cap.max_send_sge = 1;
-	qp_init_attr.cap.max_recv_sge = 1;
+	qp_init_attr.cap.max_send_wr = 1000;
+	qp_init_attr.cap.max_recv_wr = 1000;
+	qp_init_attr.cap.max_send_sge = 1000;
+	qp_init_attr.cap.max_recv_sge = 1000;
 	res->qp = ibv_create_qp(res->pd, &qp_init_attr);
 	if (!res->qp)
 	{
