@@ -92,6 +92,7 @@
 	int poll_completion(struct resources* res);
 	int post_send(struct resources* res, int opcode);
 	int post_receives(struct resources* res, int len);
+	int post_receive(struct resources* res)
 	void resources_init(struct resources* res);
 	int resources_create(struct resources* res);
 	int modify_qp_to_init(struct ibv_qp* qp);

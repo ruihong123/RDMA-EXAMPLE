@@ -561,10 +561,10 @@ int post_send(struct resources* res, int opcode)
 	return rc;
 }
 /******************************************************************************
-* Function: post_receive
+* Function: post_receives
 *
 * Input
-* res pointer to resources structure
+* res and the list length for work request list
 *
 * Output
 * none
@@ -614,6 +614,46 @@ int post_receives(struct resources* res, int len)
 		fprintf(stdout, "Receive Request was posted\n");
 	//}
 	
+	return rc;
+}
+/******************************************************************************
+* Function: post_receive
+*
+* Input
+* res pointer to resources structure
+*
+* Output
+* none
+*
+* Returns
+* 0 on success, error code on failure
+*
+* Description
+*
+******************************************************************************/
+int post_receive(struct resources* res)
+{
+	struct ibv_recv_wr rr;
+	struct ibv_sge sge;
+	struct ibv_recv_wr* bad_wr;
+	int rc;
+	/* prepare the scatter/gather entry */
+	memset(&sge, 0, sizeof(sge));
+	sge.addr = (uintptr_t)res->buf;
+	sge.length = MSG_SIZE;
+	sge.lkey = res->mr->lkey;
+	/* prepare the receive work request */
+	memset(&rr, 0, sizeof(rr));
+	rr.next = NULL;
+	rr.wr_id = 0;
+	rr.sg_list = &sge;
+	rr.num_sge = 1;
+	/* post the Receive Request to the RQ */
+	rc = ibv_post_recv(res->qp, &rr, &bad_wr);
+	if (rc)
+		fprintf(stderr, "failed to post RR\n");
+	else
+		fprintf(stdout, "Receive Request was posted\n");
 	return rc;
 }
 /* poll_completion */
