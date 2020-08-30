@@ -589,7 +589,7 @@ int post_receives(struct resources* res, int len)
 	/* prepare the receive work request */
 	memset(res->rr, 0, sizeof(*(res->rr)));
 	for (int i = 0; i < len; i++) {
-		sge[i].addr = (uintptr_t)(&(res->buf[i]));
+		sge[i].addr = (uintptr_t)(&(res->buf[i* msg_size]));
 		sge[i].length = msg_size;
 		sge[i].lkey = res->mr->lkey;
 		res->rr[i].next = NULL;
