@@ -1,5 +1,5 @@
 # RDMA-EXAMPLE
-RDMA学习
+RDMA tutorial
 # 02 RDMA test
 cd 02
 cd build
