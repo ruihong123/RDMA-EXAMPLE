@@ -4,7 +4,7 @@
 std::chrono::steady_clock::time_point start;
 std::chrono::steady_clock::time_point end;
 int main(int argc, char* argv[]) {
-	int msg_size = 4;
+	int msg_size = 4*1024;
 	//start = std::chrono::steady_clock::now();
 	
 	//end = std::chrono::steady_clock::now();
